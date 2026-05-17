@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  name            String
+  role            String   // "EMPLOYEE", "MANAGER", "ADMIN"
+  managerId       String?
+  manager         User?    @relation("ManagerToEmployee", fields: [managerId], references: [id])
+  employees       User[]   @relation("ManagerToEmployee")
+  goals           Goal[]
+  checkIns        CheckIn[] @relation("EmployeeCheckIn")
+  managerCheckIns CheckIn[] @relation("ManagerCheckIn")
+}
+
+model Goal {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  thrustArea  String
+  uom         String   // "NUMERIC", "PERCENTAGE", "TIMELINE", "ZERO_BASED"
+  trackingType String  @default("MIN") // "MIN" (Higher is better) or "MAX" (Lower is better)
+  target      String   // Stored as string to accommodate different UoM types (number, date, etc)
+  weightage   Int
+  status      String   @default("DRAFT") // "DRAFT", "PENDING_APPROVAL", "APPROVED", "REJECTED"
+  locked      Boolean  @default(false)
+  employeeId  String
+  employee    User     @relation(fields: [employeeId], references: [id])
+  achievements Achievement[]
+  auditLogs    AuditLog[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Achievement {
+  id        String   @id @default(cuid())
+  goalId    String
+  goal      Goal     @relation(fields: [goalId], references: [id])
+  actual    String   // Stored as string, similar to target
+  period    String   // "Q1", "Q2", "Q3", "Q4"
+  status    String   // "NOT_STARTED", "ON_TRACK", "COMPLETED"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([goalId, period])
+}
+
+model CheckIn {
+  id         String   @id @default(cuid())
+  employeeId String
+  employee   User     @relation("EmployeeCheckIn", fields: [employeeId], references: [id])
+  managerId  String
+  manager    User     @relation("ManagerCheckIn", fields: [managerId], references: [id])
+  period     String   // "Q1", "Q2", "Q3", "Q4"
+  comment    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([employeeId, period])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  goalId    String
+  goal      Goal     @relation(fields: [goalId], references: [id])
+  userId    String   // User who made the change
+  changes   String   // JSON string describing changes
+  timestamp DateTime @default(now())
+}
