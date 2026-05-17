@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer,
@@ -5,6 +7,12 @@ import {
 } from 'recharts';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const renderPieLabel = ({ name, percent }: any) => {
+  const pct = typeof percent === 'number' ? percent : 0;
+  return `${name} ${(pct * 100).toFixed(0)}%`;
+};
 
 export default function AnalyticsPanel() {
   const [data, setData] = useState<any>(null);
@@ -43,10 +51,10 @@ export default function AnalyticsPanel() {
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"
-                label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
+                label={renderPieLabel}
               >
                 {data.thrustAreaData.map((entry: any, index: number) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Cell key={`cell-thrust-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
               <RechartsTooltip contentStyle={{ background: '#1e1e2d', border: '1px solid #333' }} />
@@ -67,10 +75,10 @@ export default function AnalyticsPanel() {
                 outerRadius={80}
                 fill="#82ca9d"
                 dataKey="value"
-                label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
+                label={renderPieLabel}
               >
                 {data.uomData.map((entry: any, index: number) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[(index + 2) % COLORS.length]} />
+                  <Cell key={`cell-uom-${index}`} fill={COLORS[(index + 2) % COLORS.length]} />
                 ))}
               </Pie>
               <RechartsTooltip contentStyle={{ background: '#1e1e2d', border: '1px solid #333' }} />

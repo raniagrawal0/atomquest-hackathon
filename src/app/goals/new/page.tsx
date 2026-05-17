@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function NewGoalPage() {
+function NewGoalForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const employeeId = searchParams.get('employeeId');
@@ -113,5 +113,13 @@ export default function NewGoalPage() {
         </form>
       </div>
     </main>
+  );
+}
+
+export default function NewGoalPage() {
+  return (
+    <Suspense fallback={<p>Loading...</p>}>
+      <NewGoalForm />
+    </Suspense>
   );
 }
